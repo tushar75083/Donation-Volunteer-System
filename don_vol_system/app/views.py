@@ -1,11 +1,19 @@
+from django.http import HttpResponse
 from django.views import View
 from app.forms import UserForm,DonorSignupForm,VolunteerSignupForm,LoginForm,MyPasswordChangeForm,DonateNowForm,DonationAreaForm
-from django.shortcuts import redirect, render
-from app.models import Donor,Volunteer,Donation,DonationArea,Gallery
+from django.shortcuts import get_object_or_404, redirect, render
+from app.models import Donor, Payment,Volunteer,Donation,DonationArea,Gallery
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 from datetime import date
+
+
+# payment
+import razorpay # type: ignore
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+
 
 # Create your views here.
 
@@ -166,7 +174,7 @@ def index_admin(request):
         return redirect('/login-admin')
     totaldonations=Donation.objects.all().count()
     totaldonors=Donor.objects.all().count()
-    totalvolunteers=Volunteer.objects.all().count()
+    totalvolunteers=Volunteer.objects.filter(status='accept').count()
     totalpendingdonations=Donation.objects.filter(status="pending").count()
     totalaccepteddonations=Donation.objects.filter(status="Accept").count()
     totaldelivereddonations=Donation.objects.filter(status="Donation Delivered Successfully").count()
@@ -479,17 +487,21 @@ def index_donor(request):
     donationcount=Donation.objects.filter(donor=donor).count()
     acceptedcount=Donation.objects.filter(donor=donor,status="accept").count()
     rejectedcount=Donation.objects.filter(donor=donor,status="reject").count()
+    volunteerallocatedcount=Donation.objects.filter(donor=donor,status="Volunteer Allocated").count()
     pendingcount=Donation.objects.filter(donor=donor,status="pending").count()
     deliveredcount=Donation.objects.filter(donor=donor,status="Donation Delivered Successfully").count()
     return render(request, "index-donor.html",locals())
 
 
 class donate_now(View):
+    
     def get(self,request):
         form=DonateNowForm()
         return render(request, "donate-now.html",locals())
     
     def post(self,request):
+        myuser= request.user
+        print('this is my user',myuser)
         form=DonateNowForm(request.POST)
         if not request.user.is_authenticated:
             return redirect('/login-donor')
@@ -526,6 +538,7 @@ def donor_accepted_donation(request):
     donation=Donation.objects.filter(donor=donor,status='accept')
     return render(request, "donation-history.html",locals())
 
+
 def donor_rejected_donation(request):
     if not request.user.is_authenticated:
         return redirect('/login-donor')
@@ -535,6 +548,14 @@ def donor_rejected_donation(request):
     return render(request, "donation-history.html",locals())
 
 
+def donor_volunteer_allocated_donation(request):
+    if not request.user.is_authenticated:
+        return redirect('/login-donor')
+    user=request.user
+    donor=Donor.objects.get(user=user)
+    donation=Donation.objects.filter(donor=donor,status='Volunteer Allocated')
+    return render(request, "donation-history.html",locals())
+
 def donor_pending_donation(request):
     if not request.user.is_authenticated:
         return redirect('/login-donor')
@@ -543,6 +564,13 @@ def donor_pending_donation(request):
     donation=Donation.objects.filter(donor=donor,status='pending')
     return render(request, "donation-history.html",locals())
 
+def donor_delivered_donation(request):
+    if not request.user.is_authenticated:
+        return redirect('/login-donor')
+    user=request.user
+    donor=Donor.objects.get(user=user)
+    donation=Donation.objects.filter(donor=donor,status='Donation Delivered Successfully')
+    return render(request, "donation-history.html",locals())
 
 class profile_donor(View):
     def get(self,request):
@@ -772,28 +800,128 @@ class donationcollection_detail(View):
         return render(request,"donationcollection-detail.html",locals())
 
 
-class donationrec_detail(View):
-    def get(self,request,pid):
-        if not request.user.is_authenticated:
-            return redirect('/login-admin')
-        donation=Donation.objects.get(id=pid)
-        return render(request, "donationrec-detail.html",locals())
+# class donationrec_detail(View):
+#     def get(self,request,pid):
+#         if not request.user.is_authenticated:
+#             return redirect('/login-admin')
+#         donation=Donation.objects.get(id=pid)
+#         return render(request, "donationrec-detail.html",locals())
 
-    def post(self,request,pid):
+#     def post(self,request,pid):
+#         if not request.user.is_authenticated:
+#             return redirect('/login-admin')
+#         donation=Donation.objects.get(id=pid)
+#         status=request.POST['status']
+#         deliverypic=request.FILES['deliverypic']
+#         try:
+#             donation.status=status
+#             print("123")
+#             donation.updationdate=date.today()
+#             print("456")
+#             donation.save()
+#             print("789")
+#             Gallery.objects.create(donation=donation,deliverypic=deliverypic)
+#             messages.success(request,"Donation Delivered Successfully")
+#         except:
+#             messages.warning(request,"Donation Delivered Failed")
+#         return render(request, "donationrec-detail.html",locals())
+    
+class donationrec_detail(View):
+    def get(self, request, pid):
         if not request.user.is_authenticated:
             return redirect('/login-admin')
-        donation=Donation.objects.get(id=pid)
-        status=request.POST['status']
-        deliverypic=request.FILES['deliverypic']
+        donation = Donation.objects.get(id=pid)
+        return render(request, "donationrec-detail.html", locals())
+
+    def post(self, request, pid):
+        if not request.user.is_authenticated:
+            return redirect('/login-admin')
+        
+        donation = Donation.objects.get(id=pid)
+        status = request.POST.get('status')
+        deliverypic = request.FILES.get('deliverypic')
+
+        if not deliverypic:
+            messages.warning(request, "Please upload a delivery picture.")
+            return render(request, "donationrec-detail.html", locals())
+
         try:
-            donation.status=status
-            print("123")
-            donation.updationdate=date.today()
-            print("456")
+            donation.status = status
+            donation.updationdate = date.today()
+
+            # Debugging outputs
+            print(f"donationname: {donation.donationname}")
+            print(f"donor: {donation.donor}, volunteer: {donation.volunteer}")
+            print(f"status: {status}")
+            
             donation.save()
-            print("789")
-            Gallery.objects.create(donation=donation,deliverypic=deliverypic)
-            messages.success(request,"Donation Delivered Successfully")
-        except:
-            messages.warning(request,"Donation Delivered Failed")
-        return render(request, "donationrec-detail.html",locals())
+            print("Donation saved successfully")
+
+            Gallery.objects.create(donation=donation, deliverypic=deliverypic)
+            messages.success(request, "Donation Delivered Successfully")
+        except Exception as e:
+            print(f"Error during donation save: {e}")
+            messages.warning(request, "Donation Delivered Failed")
+        
+        return render(request, "donationrec-detail.html", locals())
+
+
+def payment(request):
+    # Razorpay client instance with API key and secret
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+    # Payment details
+    amount = 50000  # Amount in paisa (500.00 INR)
+    currency = 'INR'
+    receipt = 'order_rcptid_11'
+
+    try:
+        # Create an order using Razorpay API
+        order = client.order.create({
+            'amount': amount,
+            'currency': currency,
+            'receipt': receipt,
+            'payment_capture': '1'
+        })
+    except Exception as e:
+        # Log or print exception for debugging
+        print(f"Exception creating Razorpay order: {e}")
+        return render(request, 'payment_failure.html', {'error': 'Failed to create payment order. Please try again.'})
+
+    # Pass order details to the template
+    context = {
+        'razorpay_order_id': order['id'],
+        'razorpay_key': settings.RAZORPAY_KEY_ID,
+        'amount': amount
+    }
+    return render(request, 'payment.html', context)
+
+@csrf_exempt
+def payment_success(request):
+    # Retrieve payment details from request
+    razorpay_order_id = request.POST.get('razorpay_order_id')
+    razorpay_payment_id = request.POST.get('razorpay_payment_id')
+    razorpay_signature = request.POST.get('razorpay_signature')
+
+    if not all([razorpay_order_id, razorpay_payment_id, razorpay_signature]):
+        return render(request, 'payment_failure.html', {'error': 'Incomplete payment details received.'})
+
+    try:
+        # Save payment instance without associating with a donor
+        payment = Payment(
+            amount=50000,  # Example amount (in paisa)
+            razorpay_order_id=razorpay_order_id,
+            razorpay_payment_id=razorpay_payment_id,
+            razorpay_signature=razorpay_signature,
+            status='successful'  # Set based on actual payment status
+        )
+        payment.save()
+    except Exception as e:
+        # Log or print exception for debugging
+        print(f"Exception saving payment details: {e}")
+        return render(request, 'payment_failure.html', {'error': 'Failed to save payment details. Please try again.'})
+
+    return render(request, 'payment_success.html', {'message': 'Payment successful! Thank you for your donation.'})
+
+def payment_failure(request):
+    return render(request, 'payment_failure.html', {'error': 'Payment failed. Please try again.'})

@@ -48,6 +48,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
 ]
 
 ROOT_URLCONF = 'don_vol_system.urls'
@@ -134,3 +135,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # forget password email verification
 # this send link to reset password on console but we want it to send link as email 
 EMAIL_BACKEND="django.core.mail.backends.console.EmailBackend"
+
+
+# settings.py
+RAZORPAY_KEY_ID = 'rzp_test_MorzSGL8fJQomc'
+RAZORPAY_KEY_SECRET = 'tmam6DWmm5MnIEabbD9Xa77a'
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.razorpay.com',  # Allows all Razorpay subdomains
+]
+

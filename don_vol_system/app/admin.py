@@ -1,5 +1,5 @@
 from django.contrib import admin
-from app.models import Donor,Volunteer,DonationArea,Donation,Gallery
+from app.models import Donor,Volunteer,DonationArea,Donation,Gallery,Payment
 
 # Register your models here.
 @admin.register(Donor)
@@ -21,3 +21,8 @@ class DonationAdmin(admin.ModelAdmin):
 @admin.register(Gallery)
 class GalleryAdmin(admin.ModelAdmin):
     list_display=['id','donation','deliverypic','creationdate']
+
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display=['id','amount','razorpay_order_id','razorpay_payment_id','status','created_at']

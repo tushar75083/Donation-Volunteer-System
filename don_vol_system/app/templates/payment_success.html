@@ -1,0 +1,62 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Success</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    
+    <style>
+        .success-page {
+            text-align: center;
+            padding: 50px 15px;
+            background: #f8f9fa;
+            border-radius: 10px; /* Rounded corners */
+        }
+        .success-page h1 {
+            font-size: 3rem;
+            color: #28a745;
+            font-weight: bold;
+        }
+        .success-page p {
+            font-size: 1.25rem;
+            color: #6c757d;
+        }
+        .success-page .btn-custom {
+            font-size: 1.4rem;
+            background-color: #28a745; /* Green background */
+            color: #fff; /* White text */
+            border-radius: 30px; /* Rounded edges */
+            padding: 10px 20px; /* Spacing inside the button */
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            text-decoration:none;
+            
+        }
+        .success-page .btn-custom:hover {
+            background-color: #218838; /* Darker green for hover */
+            transform: translateY(-3px); /* Lift effect */
+        }
+        .success-page .btn-custom:active {
+            background-color: #1e7e34; /* Even darker green for active */
+            transform: translateY(0); /* Remove lift effect */
+        }
+        .success-page img {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5 vh-100 d-flex justify-content-center align-items-center">
+        <div class="success-page">
+            <img src="{% static 'images/success-img.jpeg' %}" alt="Success Icon" />
+            <h1>Payment Successful!</h1>
+            <p>Thank you for your generous donation, {{ donor_name }}. Your contribution will make a significant impact.</p>
+            <a href="{% url 'index' %}" class="btn btn-custom ">Go to Home</a>
+        </div>
+    </div>
+</body>
+</html>

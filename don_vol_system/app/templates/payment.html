@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block main %}
+<!-- templates/payment.html -->
+<section class="vh-100" style="background-color: #f4f5f7;">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-md-8 col-lg-6 col-xl-5">
+                <!-- Page Title -->
+                <h1 class="text-center mb-4" style="font-size: 2.5rem; font-weight: bold; color: #007bff;">
+                    Your Support Can Light Up Lives – Make a Difference Today!
+                </h1>
+
+                <!-- Motivational Message -->
+                <p class="text-center text-secondary mb-4" style="font-size: 1.1rem;">
+                    "Your kindness can bring hope to those in need. Every donation, no matter how small, 
+                    makes a big impact."
+                </p>
+
+                <!-- Bootstrap Alert for Info -->
+                <div class="alert alert-info text-center" role="alert">
+                    Please review your details and proceed with the donation. Your contribution can change lives!
+                </div>
+
+                <!-- Payment Form Card -->
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-5">
+                        <!-- Donation Confirmation Message -->
+                        <div class="mb-4">
+                            <h4 class="text-center mb-3 text-dark">Thank you for choosing to donate!</h4>
+                            <p class="text-center text-muted">Your support is invaluable. Let's make the world a better place together.</p>
+                        </div>
+
+                        <!-- Payment Form -->
+                        <form action="/payment/success/" method="POST" class="text-center">
+                            {% csrf_token %}
+
+                            <!-- Razorpay Payment Button -->
+                            <script src="https://checkout.razorpay.com/v1/checkout.js"
+                                    data-key="{{ razorpay_key }}"
+                                    data-amount="{{ amount }}"
+                                    data-currency="INR"
+                                    data-order_id="{{ razorpay_order_id }}"
+                                    data-buttontext="Donate Now"
+                                    data-name="Charity Name"
+                                    data-description="Help us with your donation"
+                                    data-prefill.name="{{ donor_name }}"
+                                    data-prefill.email="{{ donor_email }}"
+                                    data-theme.color="#007bff">
+                            </script>
+
+                            <input type="hidden" name="donor_name" value="{{ donor_name }}">
+                            <input type="hidden" name="donor_email" value="{{ donor_email }}">
+                            <input type="hidden" value="Hidden Element" name="hidden">
+                        </form>
+                    </div>
+                </div>
+
+               
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock main %}
+

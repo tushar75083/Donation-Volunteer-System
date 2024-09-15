@@ -73,7 +73,9 @@ urlpatterns = [
     path("donation-history/", views.donation_history, name="donation_history"),
     path('accepted-donations/',views.donor_accepted_donation,name='donor_accepted_donation'),
     path('rejected-donations/',views.donor_rejected_donation,name='donor_rejected_donation'),
+    path('volunteer-allocated-donations/',views.donor_volunteer_allocated_donation,name='volunteer-allocated-donations'),
     path('pending-donations/',views.donor_pending_donation,name='donor_pending_donation'),
+    path('delivered-donations/',views.donor_delivered_donation,name='donor_delivered_donations'),
     path("profile-donor/", views.profile_donor.as_view(), name="profile_donor"),
     path("changepwd-donor/", views.changepwd_donor.as_view(), name="changepwd_donor"),
 
@@ -100,6 +102,13 @@ urlpatterns = [
     path('delete_volunteer/<int:pid>',views.delete_volunteer,name='delete_volunteer'),
     path('delete_area/<int:pid>',views.delete_area,name='delete_area'),
     path('delete-donor/<int:pid>',views.delete_donor,name='delete_donor'),
+
+
+    # paymet
+    path('payment/', views.payment, name='payment'),
+    path('payment/success/', views.payment_success, name='payment_success'),
+    path('payment/failure/', views.payment_failure, name='payment_failure'),
+
 ]
 
 

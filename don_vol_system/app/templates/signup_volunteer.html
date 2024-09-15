@@ -2,55 +2,70 @@
 {% load static %}
 {% block main %}
 
-  <section class="vh-100 gradient-custom">
-    <div class="container py-5 h-100">
-      <div class="card bg-dark text-white" style="border-radius: 1rem;">
-        <div class="card-body p-5 ">
-      <div class="row d-flex justify-content-center align-items-center h-100">
-        
-        <h2 class="fw-bold mb-2 text-uppercase text-center">Volunteer Sign Up</h2>
-        <p class="text-white-50 mb-2 text-center">Please enter following details</p>
+<section class=" gradient-custom">
+  <div class="container py-5 h-100 ">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-12 col-md-8 col-lg-8 ">
+        <div class="card shadow-lg" style="border-radius: 1rem;">
+          <div class="card-body p-5">
+            <h2 class="text-uppercase text-center mb-4 fw-bold text-primary">Volunteer Sign Up</h2>
+            <p class="text-muted mb-4 text-center">Please enter your details to register</p>
 
-        <form method='post' enctype='multipart/form-data' novalidate>
-            {% csrf_token %} 
+            <form method="post" enctype="multipart/form-data" novalidate>
+              {% csrf_token %}
 
-            {% if messages %}
-            {% for message in messages %}
-                <p {% if message.tags %} class="alert alert-{{message.tags}} my-5" {% endif %}>{{message}}</p>
-            {% endfor %}
-             {% endif %}
-
-            {% for fm in form1 %}
-                <div class="form-group col-sm-12 p-2">
-                    {{fm.label_tag}} {{fm}} <small class='text-danger'>{{fm.errors|striptags}}</small>
-                </div>
-            {% endfor %}
-
-            {% for fm in form2 %}
-                <div class="form-group col-sm-12 p-2">
-                    {{fm.label_tag}} {{fm}} <small class='text-danger'>{{fm.errors|striptags}}</small>
-                </div>
-            {% endfor %}
-
-            <div class='d-grid gap-2'>
-                <input type="submit" value="Submit" class="mt-4 px-3 btn btn-primary">
-            </div>
-            
-            <div class="mt-4 px-3 text-center">
-                <p class="mb-0">Already have an account? <a href="{% url 'login_volunteer' %}" class="text-white-50 fw-bold">Login</a></p>
-            </div>
-
-            {% if form.non_field_errors %}
-                {% for error in form.non_field_errors %}
-                    <p class='alert alert-danger my-3'>{{error}}</p>
+              {% if messages %}
+                {% for message in messages %}
+                  <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
                 {% endfor %}
-            {% endif %}
+              {% endif %}
 
-        </form>
+              <div class="mb-3">
+                {% for fm in form1 %}
+                  <div class="form-group mb-3">
+                    {{ fm.label_tag }} {{ fm }}
+                    <small class="text-danger">{{ fm.errors|striptags }}</small>
+                  </div>
+                {% endfor %}
+              </div>
 
+              <div class="mb-3">
+                {% for fm in form2 %}
+                  <div class="form-group mb-3">
+                    {{ fm.label_tag }} {{ fm }}
+                    <small class="text-danger">{{ fm.errors|striptags }}</small>
+                  </div>
+                {% endfor %}
+              </div>
+
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+              </div>
+
+              <div class="mt-4 text-center">
+                <p>Already have an account? 
+                  <a href="{% url 'login_volunteer' %}" class="fw-bold text-decoration-none">Login</a>
+                </p>
+              </div>
+
+              {% if form.non_field_errors %}
+                <div class="alert alert-danger mt-3">
+                  {% for error in form.non_field_errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  </div>
-  </div>
-</div>
 </section>
+
 {% endblock main %}
+
+
