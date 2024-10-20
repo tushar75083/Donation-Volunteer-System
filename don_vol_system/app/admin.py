@@ -25,4 +25,4 @@ class GalleryAdmin(admin.ModelAdmin):
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    list_display=['id','amount','razorpay_order_id','razorpay_payment_id','status','created_at']
+    list_display=['id','name','amount','razorpay_order_id','razorpay_payment_id','created_at','ispaid']

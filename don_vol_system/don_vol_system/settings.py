@@ -132,9 +132,33 @@ MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+
 # forget password email verification
 # this send link to reset password on console but we want it to send link as email 
-EMAIL_BACKEND="django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND="django.core.mail.backends.console.EmailBackend"
+
+
+# Use the SMTP backend instead of the console backend
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+# Email configuration
+EMAIL_HOST = 'smtp.gmail.com'  # SMTP server for Gmail
+EMAIL_PORT = 587  # TLS port (secure)
+EMAIL_USE_TLS = True  # Enable TLS encryption
+EMAIL_HOST_USER = 'tusharsawant186@gmail.com'  # Your Gmail address
+EMAIL_HOST_PASSWORD = 'qetjeilmklozbazi'  # Your Gmail password or app-specific password
+DEFAULT_FROM_EMAIL = 'tusharsawant186@gmail.com'  # Email address to show in the 'from' field
+
+
+
+
+
+
+
+
+
+
 
 
 # settings.py

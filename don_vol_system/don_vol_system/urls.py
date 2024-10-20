@@ -31,10 +31,16 @@ urlpatterns = [
     path("signup-donor/", views.signup_donor.as_view(), name="signup_donor"),
     path("signup-volunteer/", views.signup_volunteer.as_view(), name="signup_volunteer"),
     path("index-admin/", views.index_admin, name="index_admin"),
+
+    # forget password
     path("password-reset/",auth_views.PasswordResetView.as_view(template_name='password_reset.html',form_class=MyPasswordResetForm),name='password_reset'),
+
     path("password-reset/done/",auth_views.PasswordResetDoneView.as_view(template_name="password_reset_done.html"),name='password_reset_done'),
+
     path("password-reset-confirm/<uidb64>/<token>/",auth_views.PasswordResetConfirmView.as_view(template_name='password_reset_confirm.html',form_class=MySetPasswordForm),name='password_reset_confirm'),
+
     path("password-reset-complete/",auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'),name='password_reset_complete'),
+
 
     # admin dashboard
     path("pending-donation/", views.pending_donation, name="pending_donation"),
@@ -103,11 +109,14 @@ urlpatterns = [
     path('delete_area/<int:pid>',views.delete_area,name='delete_area'),
     path('delete-donor/<int:pid>',views.delete_donor,name='delete_donor'),
 
+    # paymet 
+    # path('takeamount/',views.takeamount,name='takeamount'),
+    # path('payment/', views.payment, name='payment'),
+    # path('payment/success/', views.payment_success, name='payment_success'),
+    # path('payment/failure/', views.payment_failure, name='payment_failure'),
 
-    # paymet
-    path('payment/', views.payment, name='payment'),
-    path('payment/success/', views.payment_success, name='payment_success'),
-    path('payment/failure/', views.payment_failure, name='payment_failure'),
+    path('makepayment/', views.make_payment, name='payment'),
+    path("success/",views.success,name='success'),
 
 ]
 

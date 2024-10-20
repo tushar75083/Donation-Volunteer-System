@@ -8,6 +8,18 @@ from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 from datetime import date
 
+# gmail integration
+from django.core.mail import send_mail
+from don_vol_system.settings import EMAIL_HOST_USER
+# send_mail(
+#     "Subject here-Email Verification",
+
+#     "Here is the message.",
+#     EMAIL_HOST_USER,
+#     ["sawantt200@gmail.com"],
+#     fail_silently=False,
+# )
+
 
 # payment
 import razorpay # type: ignore
@@ -132,10 +144,76 @@ class signup_donor(View):
                 user=User.objects.create_user(first_name=fn,last_name=ln,username=us,email=em,password=pwd)
                 Donor.objects.create(user=user,contact=contact,userpic=userpic,address=address)
                 messages.success(request,'Congratulations!! Donor Profile Created Successfully... ')
+                send_mail(
+                    "Donor Registration!!",
+                    f"Congratulations {fn} {ln}!! You Have Successfully Created Your Donor Account....",
+                    EMAIL_HOST_USER,
+                    [em],
+                    fail_silently=False,
+                )
                 return redirect('/login-donor')
             except:
                 messages.warning(request,'Profile Not Created...')
         return render(request,'signup_donor.html',locals())
+    
+
+# class signup_donor(View):
+#     def get(self, request):
+#         form1 = UserForm()
+#         form2 = DonorSignupForm()
+#         return render(request, 'signup_donor.html', locals())
+
+#     def post(self, request):
+#         form1 = UserForm(request.POST)
+#         form2 = DonorSignupForm(request.POST)
+#         if form1.is_valid() and form2.is_valid():
+#             fn = request.POST['first_name']
+#             ln = request.POST['last_name']
+#             em = request.POST['email']
+#             us = request.POST['username']
+#             pwd = request.POST['password1']
+#             contact = request.POST['contact']
+#             userpic = request.FILES['userpic']
+#             address = request.POST['address']
+
+#             try:
+#                 # Create the user and donor profile
+#                 user = User.objects.create_user(
+#                     first_name=fn,
+#                     last_name=ln,
+#                     username=us,
+#                     email=em,
+#                     password=pwd
+#                 )
+#                 Donor.objects.create(
+#                     user=user,
+#                     contact=contact,
+#                     userpic=userpic,
+#                     address=address
+#                 )
+
+#                 # Try to send the email
+#                 try:
+#                     send_mail(
+#                         "Donor Registration!!",
+#                         f"Congratulations {fn} {ln}!! You have successfully created your donor account.",
+#                         EMAIL_HOST_USER,
+#                         [em],  # recipient list should be a list
+#                         fail_silently=False,
+#                     )
+#                     messages.success(request, 'Congratulations!! Donor Profile Created Successfully...')
+#                 except Exception as e:
+#                     # Handle email sending error
+#                     messages.warning(request, 'Profile created but failed to send email: ' + str(e))
+
+#                 return redirect('/login-donor')
+
+#             except Exception as e:
+#                 # Handle user/donor creation error
+#                 messages.warning(request, 'Profile not created due to an error: ' + str(e))
+
+#         return render(request, 'signup_donor.html', locals())
+
     
 
 class signup_volunteer(View):
@@ -163,6 +241,13 @@ class signup_volunteer(View):
                 user=User.objects.create_user(first_name=fn,last_name=ln,username=us,email=em,password=pwd)
                 Volunteer.objects.create(user=user,contact=contact,userpic=userpic,idpic=idpic,address=address,aboutme=aboutme,status="pending")
                 messages.success(request,'Congratulations!! Volunteer Profile Created Successfully... ')
+                send_mail(
+                    "Volunteer Registration!!",
+                    f"Congratulations {fn} {ln}!! You Have Successfully Created Your Volunteer Account....",
+                    EMAIL_HOST_USER,
+                    [em],
+                    fail_silently=False,
+                )
                 return redirect('/login-volunteer')
             except:
                 messages.warning(request,'Profile Not Created...')
@@ -515,6 +600,7 @@ class donate_now(View):
 
             try:
                 Donation.objects.create(donor=donor,donationname=donationname,donationpic=donationpic,collectionloc=collectionloc,description=description,status='pending',donationdate=date.today())
+                
                 messages.success(request,"Donation Saved Successfully")
             except:
                 messages.warning(request,"Failed to Donation")
@@ -800,31 +886,6 @@ class donationcollection_detail(View):
         return render(request,"donationcollection-detail.html",locals())
 
 
-# class donationrec_detail(View):
-#     def get(self,request,pid):
-#         if not request.user.is_authenticated:
-#             return redirect('/login-admin')
-#         donation=Donation.objects.get(id=pid)
-#         return render(request, "donationrec-detail.html",locals())
-
-#     def post(self,request,pid):
-#         if not request.user.is_authenticated:
-#             return redirect('/login-admin')
-#         donation=Donation.objects.get(id=pid)
-#         status=request.POST['status']
-#         deliverypic=request.FILES['deliverypic']
-#         try:
-#             donation.status=status
-#             print("123")
-#             donation.updationdate=date.today()
-#             print("456")
-#             donation.save()
-#             print("789")
-#             Gallery.objects.create(donation=donation,deliverypic=deliverypic)
-#             messages.success(request,"Donation Delivered Successfully")
-#         except:
-#             messages.warning(request,"Donation Delivered Failed")
-#         return render(request, "donationrec-detail.html",locals())
     
 class donationrec_detail(View):
     def get(self, request, pid):
@@ -850,12 +911,12 @@ class donationrec_detail(View):
             donation.updationdate = date.today()
 
             # Debugging outputs
-            print(f"donationname: {donation.donationname}")
-            print(f"donor: {donation.donor}, volunteer: {donation.volunteer}")
-            print(f"status: {status}")
+            # print(f"donationname: {donation.donationname}")
+            # print(f"donor: {donation.donor}, volunteer: {donation.volunteer}")
+            # print(f"status: {status}")
             
             donation.save()
-            print("Donation saved successfully")
+            # print("Donation saved successfully")
 
             Gallery.objects.create(donation=donation, deliverypic=deliverypic)
             messages.success(request, "Donation Delivered Successfully")
@@ -866,62 +927,115 @@ class donationrec_detail(View):
         return render(request, "donationrec-detail.html", locals())
 
 
-def payment(request):
-    # Razorpay client instance with API key and secret
-    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
-    # Payment details
-    amount = 50000  # Amount in paisa (500.00 INR)
-    currency = 'INR'
-    receipt = 'order_rcptid_11'
 
-    try:
-        # Create an order using Razorpay API
-        order = client.order.create({
-            'amount': amount,
-            'currency': currency,
-            'receipt': receipt,
-            'payment_capture': '1'
-        })
-    except Exception as e:
-        # Log or print exception for debugging
-        print(f"Exception creating Razorpay order: {e}")
-        return render(request, 'payment_failure.html', {'error': 'Failed to create payment order. Please try again.'})
+# payment integration
 
-    # Pass order details to the template
-    context = {
-        'razorpay_order_id': order['id'],
-        'razorpay_key': settings.RAZORPAY_KEY_ID,
-        'amount': amount
-    }
-    return render(request, 'payment.html', context)
+# def payment(request):
+#     # Razorpay client instance with API key and secret
+#     client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
-@csrf_exempt
-def payment_success(request):
-    # Retrieve payment details from request
-    razorpay_order_id = request.POST.get('razorpay_order_id')
-    razorpay_payment_id = request.POST.get('razorpay_payment_id')
-    razorpay_signature = request.POST.get('razorpay_signature')
+#     # Payment details
+#     amount = 50000  # Amount in paisa (500.00 INR)
+#     currency = 'INR'
+#     receipt = 'order_rcptid_11'
 
-    if not all([razorpay_order_id, razorpay_payment_id, razorpay_signature]):
-        return render(request, 'payment_failure.html', {'error': 'Incomplete payment details received.'})
+#     try:
+#         # Create an order using Razorpay API
+#         order = client.order.create({
+#             'amount': amount,
+#             'currency': currency,
+#             'receipt': receipt,
+#             'payment_capture': '1'
+#         })
+#     except Exception as e:
+#         # Log or print exception for debugging
+#         print(f"Exception creating Razorpay order: {e}")
+#         return render(request, 'payment_failure.html', {'error': 'Failed to create payment order. Please try again.'})
 
-    try:
-        # Save payment instance without associating with a donor
-        payment = Payment(
-            amount=50000,  # Example amount (in paisa)
-            razorpay_order_id=razorpay_order_id,
-            razorpay_payment_id=razorpay_payment_id,
-            razorpay_signature=razorpay_signature,
-            status='successful'  # Set based on actual payment status
-        )
+#     # Pass order details to the template
+#     context = {
+#         'razorpay_order_id': order['id'],
+#         'razorpay_key': settings.RAZORPAY_KEY_ID,
+#         'amount': amount
+#     }
+#     return render(request, 'payment.html', context)
+
+# @csrf_exempt
+# def payment_success(request):
+#     # Retrieve payment details from request
+#     razorpay_order_id = request.POST.get('razorpay_order_id')
+#     razorpay_payment_id = request.POST.get('razorpay_payment_id')
+#     razorpay_signature = request.POST.get('razorpay_signature')
+
+#     if not all([razorpay_order_id, razorpay_payment_id, razorpay_signature]):
+#         return render(request, 'payment_failure.html', {'error': 'Incomplete payment details received.'})
+
+#     try:
+#         # Save payment instance without associating with a donor
+#         payment = Payment(
+#             amount=50000,  # Example amount (in paisa)
+#             razorpay_order_id=razorpay_order_id,
+#             razorpay_payment_id=razorpay_payment_id,
+#             razorpay_signature=razorpay_signature,
+#             status='successful'  # Set based on actual payment status
+#         )
+#         payment.save()
+#     except Exception as e:
+#         # Log or print exception for debugging
+#         print(f"Exception saving payment details: {e}")
+#         return render(request, 'payment_failure.html', {'error': 'Failed to save payment details. Please try again.'})
+
+#     return render(request, 'payment_success.html', {'message': 'Payment successful! Thank you for your donation.'})
+
+# def payment_failure(request):
+#     return render(request, 'payment_failure.html', {'error': 'Payment failed. Please try again.'})
+
+
+def make_payment(request):
+    user=request.user
+    # print(f"user obtained..{user}")
+    if request.method == "POST":
+        amount=int(request.POST.get('amount'))*100
+        user=user
+        client = razorpay.Client(auth=("rzp_test_MorzSGL8fJQomc","tmam6DWmm5MnIEabbD9Xa77a"))
+        payment=client.order.create({'amount':amount,'currency':"INR",'payment_capture':'0'})
+        # print(payment)
+        payment=Payment(name=user,amount=amount,razorpay_order_id=payment['id'])
         payment.save()
-    except Exception as e:
-        # Log or print exception for debugging
-        print(f"Exception saving payment details: {e}")
-        return render(request, 'payment_failure.html', {'error': 'Failed to save payment details. Please try again.'})
+        return render(request,'makepayment.html',{'payment':payment})
+    
 
-    return render(request, 'payment_success.html', {'message': 'Payment successful! Thank you for your donation.'})
-
-def payment_failure(request):
-    return render(request, 'payment_failure.html', {'error': 'Payment failed. Please try again.'})
+    return render(request,'makepayment.html',{'user':user})
+    
+@csrf_exempt
+def success(request):
+    if request.method == "POST":
+        data = request.POST
+        try:
+            order_id = data['razorpay_order_id']
+            payment_id = data['razorpay_payment_id']
+            signature = data['razorpay_signature']
+            
+            # Fetch the corresponding payment from your DB
+            payment = Payment.objects.filter(razorpay_order_id=order_id).first()
+            
+            # Verify the payment signature to ensure it's authentic
+            client = razorpay.Client(auth=("rzp_test_MorzSGL8fJQomc", "tmam6DWmm5MnIEabbD9Xa77a"))
+            params_dict = {
+                'razorpay_order_id': order_id,
+                'razorpay_payment_id': payment_id,
+                'razorpay_signature': signature
+            }
+            
+            result = client.utility.verify_payment_signature(params_dict)
+            if result:
+                # If signature is valid, mark the payment as successful
+                payment.ispaid = True
+                payment.razorpay_payment_id = payment_id
+                payment.save()
+                return render(request, 'success.html', {'status': 'Payment successful'})
+            else:
+                return render(request, 'success.html', {'status': 'Payment signature verification failed'})
+        except:
+            return render(request, 'success.html', {'status': 'Payment failed'})

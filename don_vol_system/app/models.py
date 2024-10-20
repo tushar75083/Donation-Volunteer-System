@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 class Donor(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE)
-    contact=models.CharField(max_length=15,null=True)
+    contact=models.CharField(max_length=15,null=True,unique=True)
     address=models.CharField(max_length=300,null=True)
     userpic=models.ImageField(upload_to='donor',null=True,blank=True)
     regdate=models.DateTimeField(auto_now_add=True)
@@ -16,7 +16,7 @@ class Donor(models.Model):
 
 class Volunteer(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE)
-    contact=models.CharField(max_length=15,null=True)
+    contact=models.CharField(max_length=15,null=True,unique=True)
     address=models.CharField(max_length=300,null=True)    
     userpic=models.ImageField(upload_to='volunteer',null=True,blank=True)
     idpic=models.ImageField(upload_to='volunteer',null=True,blank=True)
@@ -73,18 +73,26 @@ class Gallery(models.Model):
     creationdate=models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.id
+        return self.donation.donationname
     
 
 class Payment(models.Model):
     # donor_name = models.ForeignKey(Donor,on_delete=models.CASCADE)
     # donor_email = models.EmailField()
-    amount = models.IntegerField()  # Amount in paisa (100 paisa = 1 INR)
+    # amount = models.IntegerField()  # Amount in paisa (100 paisa = 1 INR)
+    # razorpay_order_id = models.CharField(max_length=100)
+    # razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
+    # razorpay_signature = models.CharField(max_length=255, blank=True, null=True)
+    # status = models.CharField(max_length=50, default='pending')
+    # created_at = models.DateTimeField(auto_now_add=True)
+
+    name = models.CharField(max_length=150)
+    amount = models.IntegerField()
     razorpay_order_id = models.CharField(max_length=100)
     razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
     razorpay_signature = models.CharField(max_length=255, blank=True, null=True)
-    status = models.CharField(max_length=50, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
+    ispaid = models.BooleanField(default=False)
 
-    # def __str__(self):
-    #     return f"Payment {self.razorpay_order_id} by {self.donor_name}"
+    def __str__(self):
+        return f"Payment {self.razorpay_order_id} by {self.name}"

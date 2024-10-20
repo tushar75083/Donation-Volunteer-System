@@ -16,9 +16,9 @@
                 {% for i in gallery %}
                               
                 <tr class="text-center">
-                    <th>1</th>
+                    <th>{{forloop.counter}}</th>
                     <td >
-                        <h3 >Cloth Donation</h3>
+                        <h3 >{{i.donation.donationname}}</h3>
                         <img src="{{i.deliverypic.url}}" width="150" height="150" />
                         <h5>Donation Area : {{i.donation.donationarea.areaname}}</h5>
                         <h5>Donation Date : {{i.donation.donationdate}}</h5>
